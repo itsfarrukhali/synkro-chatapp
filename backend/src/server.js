@@ -1,12 +1,25 @@
 import express from "express";
+import path from "path";
+import ApiResponseUtil from "../utils/apiResponse.js";
+import dotenv from "dotenv";
 
+dotenv.config();
 const app = express();
+const __dirname = path.resolve();
 
 // Request Logger (Development only)
 if (process.env.NODE_ENV === "development") {
   app.use((req, _res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
+  });
+}
+
+// Make ready for deployment (Serve static files from frontend build)
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
 }
 
